@@ -8,6 +8,7 @@ Integra:
 - Observabilidade operacional
 - Histórico de monitoramento
 - Central de alertas
+- Navegação para detecção de anomalias
 
 Executar com:
 streamlit run dashboard.py
@@ -15,6 +16,7 @@ streamlit run dashboard.py
 
 import html
 from datetime import datetime
+from pathlib import Path
 
 import pandas as pd
 import plotly.graph_objects as go
@@ -55,21 +57,55 @@ st.set_page_config(
 # NAVEGAÇÃO ENTRE PÁGINAS
 # ==========================================
 
-# O Streamlit reconhece automaticamente
-# arquivos Python dentro da pasta pages.
-#
-# Não usamos st.page_link("dashboard.py"),
-# pois essa chamada provocou o erro
-# StreamlitPageNotFoundError.
-#
-# A navegação automática apresenta
-# a página principal e as páginas da pasta
-# pages na barra lateral.
+DIRETORIO_PROJETO = Path(__file__).resolve().parent
+
+ARQUIVO_ANOMALIAS = (
+    DIRETORIO_PROJETO
+    / "pages"
+    / "1_Anomalias.py"
+)
 
 with st.sidebar:
-    st.markdown("### BRITO SOLUÇÕES TECNOLOGICAS")
+    st.markdown(
+        "### BRITO SOLUÇÕES TECNOLOGICAS"
+    )
+
     st.markdown("---")
-    st.caption("Monitoramento de IA | MLOps")
+
+    st.caption(
+        "Monitoramento de IA | MLOps"
+    )
+
+    st.markdown("### Navegação")
+
+    if ARQUIVO_ANOMALIAS.is_file():
+        try:
+            st.page_link(
+                "pages/1_Anomalias.py",
+                label="Detecção de anomalias",
+                icon="🔴"
+            )
+        except Exception as erro_navegacao:
+            st.warning(
+                "A página de anomalias existe, "
+                "mas não foi reconhecida pela "
+                "navegação do Streamlit."
+            )
+            st.caption(
+                f"Diagnóstico: {erro_navegacao}"
+            )
+    else:
+        st.warning(
+            "A página de anomalias não foi "
+            "encontrada no diretório pages."
+        )
+
+    st.markdown("---")
+
+    st.caption(
+        "Pesquisa e tecnologia a serviço "
+        "da humanidade."
+    )
 
 
 # ==========================================
