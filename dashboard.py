@@ -1,6 +1,6 @@
 
 """
-Aula 22 - Central de monitoramento de IA
+Central de monitoramento de IA
 BRITO SOLUÇÕES TECNOLOGICAS
 
 Integra:
@@ -8,21 +8,26 @@ Integra:
 - Observabilidade operacional
 - Histórico de monitoramento
 - Central de alertas
-- Navegação para detecção de anomalias
 
-Executar com:
-streamlit run dashboard.py
+A navegação entre páginas é gerenciada
+exclusivamente pelo arquivo app.py.
+
+Execução recomendada:
+streamlit run app.py
 """
 
 import html
 from datetime import datetime
-from pathlib import Path
 
 import pandas as pd
 import plotly.graph_objects as go
 import requests
 import streamlit as st
 
+
+# ==========================================
+# CONFIGURAÇÕES DO PROJETO
+# ==========================================
 
 USUARIO = "ricardodevprof10"
 REPOSITORIO = "ia-classificador-historico"
@@ -42,7 +47,7 @@ CINZA = "#a1a1aa"
 
 
 # ==========================================
-# CONFIGURAÇÃO
+# CONFIGURAÇÃO DA PÁGINA
 # ==========================================
 
 st.set_page_config(
@@ -54,58 +59,16 @@ st.set_page_config(
 
 
 # ==========================================
-# NAVEGAÇÃO ENTRE PÁGINAS
+# NAVEGAÇÃO
 # ==========================================
 
-DIRETORIO_PROJETO = Path(__file__).resolve().parent
-
-ARQUIVO_ANOMALIAS = (
-    DIRETORIO_PROJETO
-    / "pages"
-    / "1_Anomalias.py"
-)
-
-with st.sidebar:
-    st.markdown(
-        "### BRITO SOLUÇÕES TECNOLOGICAS"
-    )
-
-    st.markdown("---")
-
-    st.caption(
-        "Monitoramento de IA | MLOps"
-    )
-
-    st.markdown("### Navegação")
-
-    if ARQUIVO_ANOMALIAS.is_file():
-        try:
-            st.page_link(
-                "pages/1_Anomalias.py",
-                label="Detecção de anomalias",
-                icon="🔴"
-            )
-        except Exception as erro_navegacao:
-            st.warning(
-                "A página de anomalias existe, "
-                "mas não foi reconhecida pela "
-                "navegação do Streamlit."
-            )
-            st.caption(
-                f"Diagnóstico: {erro_navegacao}"
-            )
-    else:
-        st.warning(
-            "A página de anomalias não foi "
-            "encontrada no diretório pages."
-        )
-
-    st.markdown("---")
-
-    st.caption(
-        "Pesquisa e tecnologia a serviço "
-        "da humanidade."
-    )
+# A navegação é definida em app.py:
+#
+# - Central de monitoramento
+# - Detecção de anomalias
+#
+# Não criar st.page_link ou st.navigation
+# neste arquivo para evitar duplicação.
 
 
 # ==========================================
@@ -167,7 +130,7 @@ st.markdown(
             #7f1d1d,
             transparent
         );
-        margin: 24px 0 30px;
+        margin: 20px 0 30px;
     }
 
     .secao {
