@@ -55,19 +55,19 @@ st.set_page_config(
 # NAVEGAÇÃO ENTRE PÁGINAS
 # ==========================================
 
+# O Streamlit reconhece automaticamente
+# arquivos Python dentro da pasta pages.
+#
+# Não usamos st.page_link("dashboard.py"),
+# pois essa chamada provocou o erro
+# StreamlitPageNotFoundError.
+#
+# A navegação automática apresenta
+# a página principal e as páginas da pasta
+# pages na barra lateral.
+
 with st.sidebar:
     st.markdown("### BRITO SOLUÇÕES TECNOLOGICAS")
-    st.markdown("---")
-    st.page_link(
-        "dashboard.py",
-        label="Central de monitoramento",
-        icon="📊"
-    )
-    st.page_link(
-        "pages/1_Anomalias.py",
-        label="Detecção de anomalias",
-        icon="🔎"
-    )
     st.markdown("---")
     st.caption("Monitoramento de IA | MLOps")
 
