@@ -8,18 +8,24 @@ on:
     - cron: "0 12 * * 1"
 
 permissions:
-  contents: read
+  contents: write
+
+concurrency:
+  group: monitoramento-ia
+  cancel-in-progress: false
 
 jobs:
   monitorar:
     name: Executar monitoramento
     runs-on: ubuntu-latest
-
     timeout-minutes: 10
 
     steps:
-      - name: Baixar repositório
+      - name: Baixar repositorio
         uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
 
       - name: Configurar Python
         uses: actions/setup-python@v5
@@ -27,7 +33,7 @@ jobs:
           python-version: "3.11"
           cache: pip
 
-      - name: Instalar dependências
+      - name: Instalar dependencias
         run: |
           python -m pip install -r requirements.txt
 
@@ -39,12 +45,31 @@ jobs:
         run: |
           python monitoramento.py
 
-      - name: Publicar relatório
+      - name: Atualizar historico
+        run: |
+          python atualizar_historico.py
+
+      - name: Publicar relatorios no repositorio
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add relatorios/relatorio_monitoramento.json
+          git add relatorios/historico_monitoramento.json
+
+          if git diff --cached --quiet; then
+            echo "Nenhuma alteracao encontrada."
+          else
+            git commit -m "Atualizar relatorios de monitoramento"
+            git push origin HEAD:main
+          fi
+
+      - name: Publicar artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: relatorio-monitoramento-ia
-          path: relatorios/relatorio_monitoramento.json
+          name: relatorios-monitoramento-ia
+          path: relatorios/*.json
           if-no-files-found: warn
           retention-days: 30
 
@@ -63,27 +88,23 @@ jobs:
           psi = relatorio["psi"]
           alerta = relatorio["alerta"]
 
-          resumo = os.environ.get("GITHUB_STEP_SUMMARY")
-
           mensagem = (
-              f"## Monitoramento de IA\n\n"
+              "## Monitoramento de IA\n\n"
               f"- PSI: {psi}\n"
               f"- Alerta: {alerta}\n"
           )
 
           print(mensagem)
 
+          resumo = os.environ.get("GITHUB_STEP_SUMMARY")
+
           if resumo:
-              with open(
-                  resumo,
-                  "a",
-                  encoding="utf-8"
-              ) as arquivo:
-                  arquivo.write(mensagem)
+              with open(resumo, "a", encoding="utf-8") as f:
+                  f.write(mensagem)
 
           if alerta:
               print(
-                  "::warning::Mudança expressiva "
-                  "na distribuição das previsões."
+                  "::warning::Mudanca expressiva "
+                  "na distribuicao das previsoes."
               )
           PY
