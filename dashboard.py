@@ -1,13 +1,20 @@
 
 """
-Dashboard de monitoramento de IA
+Aula 22 - Central de monitoramento de IA
 BRITO SOLUÇÕES TECNOLOGICAS
 
-Tema: preto, vermelho e branco.
-Fonte: relatórios JSON publicados no GitHub.
+Integra:
+- Monitoramento estatístico (PSI)
+- Observabilidade operacional
+- Histórico de monitoramento
+- Central de alertas
+
+Executar com:
+streamlit run dashboard.py
 """
 
 import html
+from datetime import datetime
 
 import pandas as pd
 import plotly.graph_objects as go
@@ -32,30 +39,27 @@ BRANCO = "#ffffff"
 CINZA = "#a1a1aa"
 
 
+# ==========================================
+# CONFIGURAÇÃO
+# ==========================================
+
 st.set_page_config(
-    page_title="Monitoramento de IA | BRITO",
+    page_title="Central de Monitoramento | BRITO",
     page_icon="🔴",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
 
-# =========================================
+# ==========================================
 # ESTILO VISUAL
-# =========================================
+# ==========================================
 
 st.markdown(
     """
     <style>
     :root {
         color-scheme: dark;
-    }
-
-    html, body, [class*="css"],
-    [data-testid="stAppViewContainer"],
-    [data-testid="stMain"] {
-        color: #ffffff !important;
-        font-family: Arial, sans-serif;
     }
 
     .stApp {
@@ -67,23 +71,14 @@ st.markdown(
         background: #09090b !important;
     }
 
-    [data-testid="stSidebar"] {
-        background: #111114 !important;
-    }
-
     .block-container {
+        max-width: 1450px;
         padding-top: 2.5rem;
         padding-bottom: 3rem;
-        max-width: 1450px;
     }
 
-    h1, h2, h3, h4, h5, h6,
-    p, label, span {
+    h1, h2, h3, p, label {
         color: #ffffff;
-    }
-
-    [data-testid="stCaptionContainer"] p {
-        color: #b4b4bd !important;
     }
 
     .marca {
@@ -91,12 +86,12 @@ st.markdown(
         font-size: 13px;
         font-weight: 800;
         letter-spacing: 2px;
-        margin-bottom: 10px;
+        margin-bottom: 12px;
     }
 
-    .titulo-principal {
+    .titulo {
         color: #ffffff !important;
-        font-size: clamp(28px, 3vw, 43px);
+        font-size: clamp(27px, 3vw, 42px);
         font-weight: 800;
         margin-bottom: 8px;
     }
@@ -107,7 +102,7 @@ st.markdown(
         margin-bottom: 25px;
     }
 
-    .linha-vermelha {
+    .linha {
         height: 3px;
         background: linear-gradient(
             90deg,
@@ -115,37 +110,50 @@ st.markdown(
             #7f1d1d,
             transparent
         );
-        margin: 22px 0 28px;
+        margin: 24px 0 30px;
     }
 
-    .metric-card {
+    .secao {
+        color: #ffffff !important;
+        font-size: 22px;
+        font-weight: 800;
+        margin: 25px 0 15px;
+    }
+
+    .descricao {
+        color: #b4b4bd !important;
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+
+    .cartao {
         background: #18181b;
-        border: 1px solid #34343a;
+        border: 1px solid #3f3f46;
         border-top: 3px solid #dc2626;
         border-radius: 12px;
-        padding: 23px 20px;
-        min-height: 145px;
+        padding: 22px 18px;
+        min-height: 140px;
         margin-bottom: 14px;
     }
 
-    .metric-label {
-        color: #c4c4cc !important;
+    .cartao-label {
+        color: #d4d4d8 !important;
         font-size: 13px;
         font-weight: 600;
-        margin-bottom: 13px;
+        margin-bottom: 12px;
     }
 
-    .metric-value {
+    .cartao-valor {
         color: #ffffff !important;
-        font-size: clamp(26px, 3vw, 37px);
+        font-size: clamp(25px, 2.8vw, 35px);
         font-weight: 800;
-        line-height: 1.2;
+        overflow-wrap: anywhere;
     }
 
-    .metric-detail {
+    .cartao-detalhe {
         color: #a1a1aa !important;
         font-size: 12px;
-        margin-top: 12px;
+        margin-top: 10px;
     }
 
     .alerta {
@@ -154,12 +162,12 @@ st.markdown(
         border-left: 5px solid #ef4444;
         border-radius: 10px;
         padding: 20px;
-        margin: 15px 0 26px;
+        margin: 12px 0;
     }
 
     .alerta-titulo {
         color: #ffffff !important;
-        font-size: 17px;
+        font-size: 16px;
         font-weight: 800;
         margin-bottom: 8px;
     }
@@ -176,21 +184,7 @@ st.markdown(
         border-left: 5px solid #22c55e;
         border-radius: 10px;
         padding: 20px;
-        margin: 15px 0 26px;
-    }
-
-    .secao-titulo {
-        color: #ffffff !important;
-        font-size: 22px;
-        font-weight: 800;
-        margin-top: 20px;
-        margin-bottom: 10px;
-    }
-
-    .secao-descricao {
-        color: #a1a1aa !important;
-        font-size: 14px;
-        margin-bottom: 18px;
+        margin: 12px 0;
     }
 
     div.stButton > button {
@@ -199,13 +193,11 @@ st.markdown(
         border: 1px solid #ef4444 !important;
         border-radius: 8px !important;
         font-weight: 700 !important;
-        padding: 9px 20px !important;
     }
 
     div.stButton > button:hover {
         background: #b91c1c !important;
         color: #ffffff !important;
-        border-color: #f87171 !important;
     }
 
     div.stButton > button p {
@@ -213,25 +205,26 @@ st.markdown(
     }
 
     [data-testid="stDataFrame"] {
-        border: 1px solid #38383f;
+        border: 1px solid #3f3f46;
         border-radius: 8px;
     }
 
-    hr {
-        border-color: #38383f !important;
+    [data-testid="stCaptionContainer"] p {
+        color: #b4b4bd !important;
     }
 
     .rodape {
+        text-align: center;
         color: #a1a1aa !important;
         font-size: 12px;
-        text-align: center;
-        padding: 25px 0;
+        line-height: 1.9;
+        padding: 20px;
     }
 
     @media (max-width: 700px) {
-        .metric-card {
-            min-height: 125px;
-            padding: 17px;
+        .cartao {
+            padding: 15px;
+            min-height: 120px;
         }
     }
     </style>
@@ -240,13 +233,13 @@ st.markdown(
 )
 
 
-# =========================================
-# FUNÇÕES AUXILIARES
-# =========================================
+# ==========================================
+# FUNÇÕES DE DADOS
+# ==========================================
 
 @st.cache_data(ttl=60)
-def carregar_json(nome_arquivo):
-    url = f"{URL_BASE}/{nome_arquivo}"
+def carregar_json(nome):
+    url = f"{URL_BASE}/{nome}"
 
     resposta = requests.get(
         url,
@@ -254,27 +247,76 @@ def carregar_json(nome_arquivo):
     )
 
     resposta.raise_for_status()
+
     return resposta.json()
 
 
-def cartao(titulo, valor, detalhe):
-    titulo = html.escape(str(titulo))
-    valor = html.escape(str(valor))
-    detalhe = html.escape(str(detalhe))
+def carregar_opcional(nome):
+    try:
+        return carregar_json(nome)
+    except (
+        requests.RequestException,
+        ValueError
+    ):
+        return None
 
+
+def seguro(valor):
+    return html.escape(str(valor))
+
+
+def cartao(titulo, valor, detalhe):
     st.markdown(
         f"""
-        <div class="metric-card">
-            <div class="metric-label">{titulo}</div>
-            <div class="metric-value">{valor}</div>
-            <div class="metric-detail">{detalhe}</div>
+        <div class="cartao">
+            <div class="cartao-label">
+                {seguro(titulo)}
+            </div>
+            <div class="cartao-valor">
+                {seguro(valor)}
+            </div>
+            <div class="cartao-detalhe">
+                {seguro(detalhe)}
+            </div>
         </div>
         """,
         unsafe_allow_html=True
     )
 
 
-def estilizar_grafico(figura, altura=410):
+def alerta_visual(titulo, mensagem, ativo=True):
+    classe = "alerta" if ativo else "normal"
+
+    st.markdown(
+        f"""
+        <div class="{classe}">
+            <div class="alerta-titulo">
+                {seguro(titulo)}
+            </div>
+            <div class="alerta-texto">
+                {seguro(mensagem)}
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+def titulo_secao(titulo, descricao=""):
+    st.markdown(
+        f'<div class="secao">{seguro(titulo)}</div>',
+        unsafe_allow_html=True
+    )
+
+    if descricao:
+        st.markdown(
+            f'<div class="descricao">'
+            f'{seguro(descricao)}</div>',
+            unsafe_allow_html=True
+        )
+
+
+def estilizar_grafico(figura, altura=380):
     figura.update_layout(
         paper_bgcolor=PRETO,
         plot_bgcolor=CARTAO,
@@ -285,30 +327,27 @@ def estilizar_grafico(figura, altura=410):
         ),
         height=altura,
         margin=dict(
-            l=30,
+            l=25,
             r=25,
-            t=35,
+            t=40,
             b=35
         ),
         legend=dict(
             orientation="h",
             yanchor="bottom",
             y=1.02,
-            xanchor="left",
             x=0,
             font=dict(color=BRANCO)
         ),
         xaxis=dict(
             color=BRANCO,
             showgrid=False,
-            linecolor="#52525b",
-            tickfont=dict(color=BRANCO)
+            linecolor="#52525b"
         ),
         yaxis=dict(
             color=BRANCO,
             gridcolor="#34343a",
-            zerolinecolor="#52525b",
-            tickfont=dict(color=BRANCO)
+            zerolinecolor="#52525b"
         ),
         hoverlabel=dict(
             bgcolor="#27272a",
@@ -319,9 +358,22 @@ def estilizar_grafico(figura, altura=410):
     return figura
 
 
-# =========================================
+def formatar_data(valor):
+    if not valor:
+        return "Não informada"
+
+    try:
+        data = datetime.fromisoformat(
+            str(valor).replace("Z", "+00:00")
+        )
+        return data.strftime("%d/%m/%Y %H:%M UTC")
+    except (ValueError, TypeError):
+        return str(valor)
+
+
+# ==========================================
 # CABEÇALHO
-# =========================================
+# ==========================================
 
 st.markdown(
     '<div class="marca">'
@@ -331,76 +383,75 @@ st.markdown(
 )
 
 st.markdown(
-    '<div class="titulo-principal">'
-    'Dashboard de monitoramento de IA'
+    '<div class="titulo">'
+    'Central de monitoramento de IA'
     '</div>',
     unsafe_allow_html=True
 )
 
 st.markdown(
     '<div class="subtitulo">'
-    'Monitoramento de modelos | '
-    'Análise de distribuições | MLOps'
+    'Observabilidade | Monitoramento estatístico '
+    '| Alertas inteligentes | MLOps'
     '</div>',
     unsafe_allow_html=True
 )
 
 st.markdown(
-    '<div class="linha-vermelha"></div>',
+    '<div class="linha"></div>',
     unsafe_allow_html=True
 )
 
-if st.button("↻ Atualizar dados"):
+if st.button("↻ Atualizar indicadores"):
     st.cache_data.clear()
     st.rerun()
 
 
-# =========================================
-# CARREGAMENTO
-# =========================================
+# ==========================================
+# CARREGAR RELATÓRIOS
+# ==========================================
 
 try:
-    relatorio = carregar_json(
+    estatistico = carregar_json(
         "relatorio_monitoramento.json"
     )
-
-except (requests.RequestException, ValueError) as erro:
+except (
+    requests.RequestException,
+    ValueError
+) as erro:
     st.error(
-        "Não foi possível carregar o relatório JSON. "
-        "Verifique o workflow no GitHub Actions."
+        "Não foi possível carregar o relatório "
+        "estatístico do GitHub."
     )
     st.code(str(erro))
     st.stop()
 
-
-psi = float(relatorio["psi"])
-limite = float(relatorio["limite_alerta"])
-alerta = bool(relatorio["alerta"])
-
-quantidade_referencia = int(
-    relatorio["quantidade_referencia"]
+operacional = carregar_opcional(
+    "metricas_observabilidade.json"
 )
 
-quantidade_atual = int(
-    relatorio["quantidade_atual"]
+historico = carregar_opcional(
+    "historico_monitoramento.json"
 )
+
+
+# ==========================================
+# VISÃO ESTATÍSTICA
+# ==========================================
+
+titulo_secao(
+    "Monitoramento estatístico",
+    "Acompanhamento da distribuição "
+    "das categorias previstas."
+)
+
+psi = float(estatistico["psi"])
+limite = float(estatistico["limite_alerta"])
+alerta_psi = bool(estatistico["alerta"])
 
 total_documentos = (
-    quantidade_referencia + quantidade_atual
-)
-
-versao = relatorio["versao"]
-
-
-# =========================================
-# INDICADORES
-# =========================================
-
-st.markdown(
-    '<div class="secao-titulo">'
-    'Visão geral'
-    '</div>',
-    unsafe_allow_html=True
+    int(estatistico["quantidade_referencia"])
+    + int(estatistico["quantidade_atual"])
 )
 
 col1, col2, col3, col4 = st.columns(4)
@@ -414,7 +465,7 @@ with col1:
 
 with col2:
     cartao(
-        "Limite de alerta",
+        "Limite de PSI",
         f"{limite:.2f}",
         "Limite configurado"
     )
@@ -429,71 +480,158 @@ with col3:
 with col4:
     cartao(
         "Versão do modelo",
-        versao,
+        estatistico["versao"],
         "Classificador histórico"
     )
 
 
-# =========================================
-# STATUS
-# =========================================
+# ==========================================
+# VISÃO OPERACIONAL
+# ==========================================
 
-if alerta:
-    st.markdown(
-        """
-        <div class="alerta">
-            <div class="alerta-titulo">
-                ⚠ ALERTA DE MONITORAMENTO
-            </div>
-            <div class="alerta-texto">
-                Foi identificada uma mudança expressiva
-                na distribuição das categorias previstas.
-                O PSI ultrapassou o limite configurado.
-                Isso não comprova perda de acurácia.
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-else:
-    st.markdown(
-        """
-        <div class="normal">
-            <div class="alerta-titulo">
-                MONITORAMENTO NORMAL
-            </div>
-            <div class="alerta-texto">
-                O PSI está dentro do limite
-                configurado para o experimento.
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-
-# =========================================
-# DISTRIBUIÇÕES
-# =========================================
-
-st.markdown(
-    '<div class="secao-titulo">'
-    'Distribuição das categorias'
-    '</div>',
-    unsafe_allow_html=True
+titulo_secao(
+    "Observabilidade operacional",
+    "Métricas de execução, erros "
+    "e tempos de resposta."
 )
 
-st.markdown(
-    '<div class="secao-descricao">'
-    'Comparação entre as previsões de referência '
-    'e as previsões atuais.'
-    '</div>',
-    unsafe_allow_html=True
+if operacional:
+    total = int(
+        operacional["total_requisicoes"]
+    )
+
+    erros = int(
+        operacional["erros"]
+    )
+
+    taxa = float(
+        operacional["taxa_erros_pct"]
+    )
+
+    latencia_media = float(
+        operacional["latencia_media_ms"]
+    )
+
+    p95 = float(
+        operacional["latencia_p95_ms"]
+    )
+
+    col1, col2, col3, col4 = st.columns(4)
+
+    with col1:
+        cartao(
+            "Solicitações",
+            total,
+            "Total processado"
+        )
+
+    with col2:
+        cartao(
+            "Taxa de erros",
+            f"{taxa:.1f}%",
+            f"{erros} falhas registradas"
+        )
+
+    with col3:
+        cartao(
+            "Latência média",
+            f"{latencia_media:.2f} ms",
+            "Tempo médio por solicitação"
+        )
+
+    with col4:
+        cartao(
+            "Latência P95",
+            f"{p95:.2f} ms",
+            "Percentil 95"
+        )
+
+else:
+    st.info(
+        "O relatório operacional ainda não "
+        "está disponível. Execute o workflow "
+        "'Observabilidade de IA' no GitHub Actions."
+    )
+
+
+# ==========================================
+# CENTRAL DE ALERTAS
+# ==========================================
+
+titulo_secao(
+    "Central de alertas",
+    "Condições que exigem investigação."
+)
+
+if alerta_psi:
+    alerta_visual(
+        "ALERTA ESTATÍSTICO",
+        (
+            f"PSI de {psi:.4f} acima do limite "
+            f"de {limite:.2f}. Foi detectada "
+            "uma mudança na distribuição "
+            "das previsões. Isso não comprova "
+            "degradação da acurácia."
+        )
+    )
+else:
+    alerta_visual(
+        "MONITORAMENTO ESTATÍSTICO NORMAL",
+        "O PSI está dentro do limite configurado.",
+        ativo=False
+    )
+
+if operacional:
+    alertas = operacional.get("alertas", [])
+
+    if alertas:
+        for item in alertas:
+            severidade = str(
+                item.get("severidade", "não informada")
+            ).upper()
+
+            alerta_visual(
+                f"ALERTA OPERACIONAL — {severidade}",
+                item.get(
+                    "mensagem",
+                    "Condição operacional detectada."
+                )
+            )
+    else:
+        alerta_visual(
+            "SEM ALERTAS OPERACIONAIS",
+            "Nenhum limite operacional foi "
+            "ultrapassado nesta execução.",
+            ativo=False
+        )
+
+    if operacional.get("ambiente") == "laboratorio_sintetico":
+        st.caption(
+            "As métricas operacionais pertencem "
+            "a um laboratório sintético, "
+            "não a tráfego real de produção."
+        )
+else:
+    st.info(
+        "A avaliação de alertas operacionais "
+        "ficará disponível após a publicação "
+        "do relatório de observabilidade."
+    )
+
+
+# ==========================================
+# GRÁFICO DE DISTRIBUIÇÕES
+# ==========================================
+
+titulo_secao(
+    "Distribuição das previsões",
+    "Comparação entre o período de referência "
+    "e a amostra atual."
 )
 
 linhas = []
 
-for categoria, valores in relatorio[
+for categoria, valores in estatistico[
     "distribuicoes"
 ].items():
     linhas.append({
@@ -516,10 +654,9 @@ fig.add_trace(
         y=df["Referência (%)"],
         name="Referência",
         marker_color=BRANCO,
-        text=df["Referência (%)"],
-        textposition="outside",
-        textfont=dict(color=BRANCO),
-        hovertemplate="%{x}: %{y:.2f}%<extra></extra>"
+        hovertemplate=(
+            "%{x}: %{y:.2f}%<extra></extra>"
+        )
     )
 )
 
@@ -529,17 +666,16 @@ fig.add_trace(
         y=df["Atual (%)"],
         name="Atual",
         marker_color=VERMELHO,
-        text=df["Atual (%)"],
-        textposition="outside",
-        textfont=dict(color=BRANCO),
-        hovertemplate="%{x}: %{y:.2f}%<extra></extra>"
+        hovertemplate=(
+            "%{x}: %{y:.2f}%<extra></extra>"
+        )
     )
 )
 
 fig.update_layout(
     barmode="group",
-    yaxis_title="Percentual (%)",
-    bargap=0.28
+    bargap=0.28,
+    yaxis_title="Percentual (%)"
 )
 
 fig.update_yaxes(
@@ -556,23 +692,9 @@ fig.update_yaxes(
     ]
 )
 
-fig = estilizar_grafico(fig)
-
 st.plotly_chart(
-    fig,
+    estilizar_grafico(fig),
     use_container_width=True
-)
-
-
-# =========================================
-# TABELA
-# =========================================
-
-st.markdown(
-    '<div class="secao-titulo">'
-    'Detalhamento por categoria'
-    '</div>',
-    unsafe_allow_html=True
 )
 
 st.dataframe(
@@ -585,45 +707,30 @@ st.dataframe(
 )
 
 
-# =========================================
-# HISTÓRICO
-# =========================================
+# ==========================================
+# HISTÓRICO DE PSI
+# ==========================================
 
-st.markdown(
-    '<div class="secao-titulo">'
-    'Histórico de monitoramento'
-    '</div>',
-    unsafe_allow_html=True
+titulo_secao(
+    "Histórico de monitoramento",
+    "Evolução do PSI ao longo das execuções."
 )
 
-try:
-    historico = carregar_json(
-        "historico_monitoramento.json"
-    )
+if isinstance(historico, list) and historico:
+    df_h = pd.DataFrame(historico)
 
-    df_historico = pd.DataFrame(historico)
-
-    if not df_historico.empty:
-        df_historico["data_utc"] = pd.to_datetime(
-            df_historico["data_utc"],
-            utc=True
-        )
-
-        df_historico = df_historico.sort_values(
-            "data_utc"
-        )
-
-        df_historico["Execução"] = range(
+    if "psi" in df_h.columns:
+        df_h["Execução"] = range(
             1,
-            len(df_historico) + 1
+            len(df_h) + 1
         )
 
-        fig_historico = go.Figure()
+        fig_h = go.Figure()
 
-        fig_historico.add_trace(
+        fig_h.add_trace(
             go.Scatter(
-                x=df_historico["Execução"],
-                y=df_historico["psi"],
+                x=df_h["Execução"],
+                y=df_h["psi"],
                 mode="lines+markers",
                 name="PSI",
                 line=dict(
@@ -631,8 +738,8 @@ try:
                     width=3
                 ),
                 marker=dict(
-                    size=9,
                     color=BRANCO,
+                    size=9,
                     line=dict(
                         color=VERMELHO,
                         width=2
@@ -641,7 +748,7 @@ try:
             )
         )
 
-        fig_historico.add_hline(
+        fig_h.add_hline(
             y=limite,
             line_color=VERMELHO_CLARO,
             line_dash="dash",
@@ -649,48 +756,69 @@ try:
             annotation_font_color=BRANCO
         )
 
-        fig_historico.update_layout(
+        fig_h.update_layout(
             xaxis_title="Execução",
             yaxis_title="PSI"
         )
 
-        fig_historico = estilizar_grafico(
-            fig_historico,
-            altura=350
-        )
-
         st.plotly_chart(
-            fig_historico,
+            estilizar_grafico(fig_h, 340),
             use_container_width=True
         )
 
         st.dataframe(
-            df_historico,
+            df_h,
             use_container_width=True,
             hide_index=True
         )
-
     else:
         st.info(
-            "Ainda não há registros no histórico."
+            "O histórico não contém a coluna PSI."
         )
-
-except (
-    requests.RequestException,
-    ValueError,
-    KeyError
-):
+else:
     st.info(
-        "O histórico ainda não está disponível."
+        "Histórico ainda não disponível."
     )
 
 
-# =========================================
+# ==========================================
+# INFORMAÇÕES DOS RELATÓRIOS
+# ==========================================
+
+titulo_secao("Informações dos relatórios")
+
+data_estatistica = (
+    estatistico.get("data_monitoramento")
+    or estatistico.get("data_utc")
+)
+
+st.write(
+    "**Último relatório estatístico:**",
+    formatar_data(data_estatistica)
+)
+
+if operacional:
+    st.write(
+        "**Último relatório operacional:**",
+        formatar_data(
+            operacional.get("data_utc")
+        )
+    )
+
+st.caption(
+    "Os relatórios são gerados em execuções "
+    "independentes e podem ter datas diferentes. "
+    "O painel não representa telemetria contínua "
+    "em tempo real."
+)
+
+
+# ==========================================
 # RODAPÉ
-# =========================================
+# ==========================================
 
 st.markdown(
-    '<div class="linha-vermelha"></div>',
+    '<div class="linha"></div>',
     unsafe_allow_html=True
 )
 
@@ -698,8 +826,9 @@ st.markdown(
     """
     <div class="rodape">
         BRITO SOLUÇÕES TECNOLOGICAS<br>
-        Pesquisa e tecnologia a serviço da humanidade.<br>
-        Dashboard educacional de monitoramento de IA.
+        Pesquisa e tecnologia a serviço
+        da humanidade.<br>
+        Central educacional de monitoramento de IA
     </div>
     """,
     unsafe_allow_html=True
