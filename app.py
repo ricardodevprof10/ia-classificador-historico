@@ -1,80 +1,63 @@
 
 """
+Aplicação principal
 BRITO SOLUÇÕES TECNOLOGICAS
 
-Navegação principal da plataforma de
-monitoramento de inteligência artificial.
-
-Páginas:
-- Central de monitoramento de IA
-- Detecção de anomalias
+Sistema integrado de monitoramento,
+detecção de anomalias e auditoria de IA.
 """
-
-from pathlib import Path
 
 import streamlit as st
 
 
-DIRETORIO_PROJETO = Path(__file__).resolve().parent
-
-ARQUIVO_DASHBOARD = DIRETORIO_PROJETO / "dashboard.py"
-
-ARQUIVO_ANOMALIAS = (
-    DIRETORIO_PROJETO
-    / "pages"
-    / "1_Anomalias.py"
+st.set_page_config(
+    page_title="Monitoramento de IA | BRITO",
+    page_icon="🔴",
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
 
-def iniciar_aplicacao():
+# ==========================================
+# PÁGINAS DA APLICAÇÃO
+# ==========================================
 
-    arquivos_ausentes = []
+pagina_monitoramento = st.Page(
+    "dashboard.py",
+    title="Central de monitoramento",
+    icon="📊",
+    default=True,
+    url_path=""
+)
 
-    if not ARQUIVO_DASHBOARD.is_file():
-        arquivos_ausentes.append("dashboard.py")
+pagina_anomalias = st.Page(
+    "pages/1_Anomalias.py",
+    title="Detecção de anomalias",
+    icon="🔴",
+    url_path="Anomalias"
+)
 
-    if not ARQUIVO_ANOMALIAS.is_file():
-        arquivos_ausentes.append(
-            "pages/1_Anomalias.py"
-        )
-
-    if arquivos_ausentes:
-        st.error(
-            "Não foi possível iniciar a navegação. "
-            "Os seguintes arquivos não foram encontrados:"
-        )
-
-        for arquivo in arquivos_ausentes:
-            st.code(arquivo)
-
-        st.stop()
-
-    pagina_monitoramento = st.Page(
-        "dashboard.py",
-        title="Central de monitoramento",
-        icon="📊",
-        default=True
-    )
-
-    pagina_anomalias = st.Page(
-        "pages/1_Anomalias.py",
-        title="Detecção de anomalias",
-        icon="🔴"
-    )
-
-    navegacao = st.navigation(
-        {
-            "Monitoramento de IA": [
-                pagina_monitoramento,
-                pagina_anomalias
-            ]
-        },
-        position="sidebar",
-        expanded=True
-    )
-
-    navegacao.run()
+pagina_auditoria = st.Page(
+    "pages/2_Auditoria.py",
+    title="Auditoria e governança",
+    icon="🛡️",
+    url_path="Auditoria"
+)
 
 
-if __name__ == "__main__":
-    iniciar_aplicacao()
+# ==========================================
+# NAVEGAÇÃO CENTRALIZADA
+# ==========================================
+
+navegacao = st.navigation(
+    {
+        "Monitoramento de IA": [
+            pagina_monitoramento,
+            pagina_anomalias,
+            pagina_auditoria
+        ]
+    },
+    position="sidebar"
+)
+
+navegacao.run()
