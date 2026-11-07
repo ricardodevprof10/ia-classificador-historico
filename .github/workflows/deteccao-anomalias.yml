@@ -1,0 +1,76 @@
+
+name: Deteccao automatizada de anomalias
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    - cron: "30 9 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: deteccao-anomalias
+  cancel-in-progress: false
+
+jobs:
+  detectar-anomalias:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar repositorio
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Executar testes
+        run: |
+          python -m pytest test_detector_anomalias.py -v
+
+      - name: Executar detector
+        run: |
+          python detector_anomalias.py
+
+      - name: Validar relatorio
+        run: |
+          python -m json.tool \
+            relatorios/relatorio_anomalias.json \
+            > /dev/null
+
+      - name: Publicar artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-anomalias
+          path: relatorios/relatorio_anomalias.json
+          if-no-files-found: error
+
+      - name: Publicar JSON no repositorio
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email \
+            "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add relatorios/relatorio_anomalias.json
+
+          if git diff --cached --quiet; then
+            echo "Nenhuma alteracao encontrada."
+            exit 0
+          fi
+
+          git commit -m \
+            "Atualizar relatorio de anomalias [skip ci]"
+
+          git push origin HEAD:main
