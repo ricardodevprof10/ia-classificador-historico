@@ -1,0 +1,15 @@
+{
+  "modelo": "classificador_historico",
+  "data_utc": "2026-11-07T16:47:55.584054+00:00",
+  "total_requisicoes": 10,
+  "sucessos": 9,
+  "erros": 1,
+  "taxa_erros_pct": 10.0,
+  "latencia_media_ms": 0.948,
+  "latencia_p95_ms": 1.175,
+  "limite_erros_pct": 10.0,
+  "limite_latencia_ms": 1000.0,
+  "alerta": false,
+  "alertas": [],
+  "ambiente": "laboratorio_sintetico"
+}
