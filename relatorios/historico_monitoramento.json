@@ -1,0 +1,9 @@
+[
+  {
+    "data_utc": "2026-11-07T16:31:47.319081+00:00",
+    "modelo": "classificador_historico",
+    "versao": "1.0.0",
+    "psi": 0.603534,
+    "alerta": true
+  }
+]

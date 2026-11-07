@@ -1,0 +1,30 @@
+{
+  "modelo": "classificador_historico",
+  "versao": "1.0.0",
+  "data_utc": "2026-11-07T16:31:47.319081+00:00",
+  "quantidade_referencia": 16,
+  "quantidade_atual": 16,
+  "metrica": "PSI das categorias previstas",
+  "psi": 0.603534,
+  "limite_alerta": 0.25,
+  "alerta": true,
+  "distribuicoes": {
+    "Cultura": {
+      "referencia_pct": 25.0,
+      "atual_pct": 12.5
+    },
+    "Economia": {
+      "referencia_pct": 25.0,
+      "atual_pct": 12.5
+    },
+    "Educação": {
+      "referencia_pct": 25.0,
+      "atual_pct": 12.5
+    },
+    "Política": {
+      "referencia_pct": 25.0,
+      "atual_pct": 62.4999
+    }
+  },
+  "observacao": "Mudança nas previsões não comprova redução da acurácia."
+}
