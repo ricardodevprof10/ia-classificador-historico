@@ -1,0 +1,160 @@
+{
+    "empresa": "BRITO SOLUÇÕES TECNOLOGICAS",
+    "projeto": "Classificador histórico",
+    "tipo": "auditoria_exploratoria",
+    "ambiente": "laboratorio_sintetico",
+    "versao_auditoria": "1.0.0",
+    "data_utc": "2026-11-07T18:19:30.964746+00:00",
+    "total_treinamento": 67,
+    "total_teste": 12,
+    "categorias": [
+        "Política",
+        "Economia",
+        "Cultura",
+        "Educação"
+    ],
+    "acuracia": 0.3333,
+    "f1_macro": 0.2321,
+    "diferenca_recall": 1.0,
+    "razao_desequilibrio": 16.6667,
+    "distribuicao_treinamento": {
+        "Política": {
+            "quantidade": 50,
+            "proporcao": 0.7463
+        },
+        "Economia": {
+            "quantidade": 10,
+            "proporcao": 0.1493
+        },
+        "Cultura": {
+            "quantidade": 4,
+            "proporcao": 0.0597
+        },
+        "Educação": {
+            "quantidade": 3,
+            "proporcao": 0.0448
+        }
+    },
+    "metricas_por_categoria": {
+        "Política": {
+            "precision": 0.2727,
+            "recall": 1.0,
+            "f1": 0.4286,
+            "suporte": 3
+        },
+        "Economia": {
+            "precision": 1.0,
+            "recall": 0.3333,
+            "f1": 0.5,
+            "suporte": 3
+        },
+        "Cultura": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "suporte": 3
+        },
+        "Educação": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "suporte": 3
+        }
+    },
+    "matriz_confusao": [
+        [
+            3,
+            0,
+            0,
+            0
+        ],
+        [
+            2,
+            1,
+            0,
+            0
+        ],
+        [
+            3,
+            0,
+            0,
+            0
+        ],
+        [
+            3,
+            0,
+            0,
+            0
+        ]
+    ],
+    "erros_classificacao": [
+        {
+            "documento": "Os salários aumentaram na indústria.",
+            "categoria_real": "Economia",
+            "categoria_prevista": "Política"
+        },
+        {
+            "documento": "A inflação prejudicou o comércio.",
+            "categoria_real": "Economia",
+            "categoria_prevista": "Política"
+        },
+        {
+            "documento": "O festival apresentou música e teatro.",
+            "categoria_real": "Cultura",
+            "categoria_prevista": "Política"
+        },
+        {
+            "documento": "Artistas organizaram uma exposição no museu.",
+            "categoria_real": "Cultura",
+            "categoria_prevista": "Política"
+        },
+        {
+            "documento": "A literatura ganhou destaque cultural.",
+            "categoria_real": "Cultura",
+            "categoria_prevista": "Política"
+        },
+        {
+            "documento": "Professores discutiram o ensino nas escolas.",
+            "categoria_real": "Educação",
+            "categoria_prevista": "Política"
+        },
+        {
+            "documento": "A universidade recebeu novos alunos.",
+            "categoria_real": "Educação",
+            "categoria_prevista": "Política"
+        },
+        {
+            "documento": "A biblioteca apoiou a educação dos estudantes.",
+            "categoria_real": "Educação",
+            "categoria_prevista": "Política"
+        }
+    ],
+    "limites": {
+        "f1_macro_minimo": 0.6,
+        "diferenca_recall_maxima": 0.3,
+        "razao_desequilibrio_maxima": 3.0
+    },
+    "alerta": true,
+    "quantidade_alertas": 3,
+    "alertas": [
+        {
+            "tipo": "baixo_f1_macro",
+            "mensagem": "O F1 macro ficou abaixo do limite configurado."
+        },
+        {
+            "tipo": "diferenca_recall",
+            "mensagem": "Foi identificada diferença elevada de recall entre categorias."
+        },
+        {
+            "tipo": "desequilibrio_treinamento",
+            "mensagem": "O conjunto de treinamento apresenta desequilíbrio elevado."
+        }
+    ],
+    "observacoes": [
+        "Dados sintéticos.",
+        "Modelo demonstrativo.",
+        "Não representa o classificador de produção.",
+        "Alertas indicam condições para investigação.",
+        "Não comprovam discriminação algorítmica."
+    ]
+}
