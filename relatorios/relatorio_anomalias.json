@@ -1,0 +1,35 @@
+{
+  "modelo": "classificador_historico",
+  "detector": "IsolationForest",
+  "versao_detector": "1.0.0",
+  "data_utc": "2026-11-07T17:10:44.926424+00:00",
+  "ambiente": "laboratorio_sintetico",
+  "total_solicitacoes": 103,
+  "anomalias_detectadas": 4,
+  "percentual_anomalias": 3.88,
+  "latencia_media_ms": 116.21,
+  "latencia_p95_ms": 114.558,
+  "alerta": true,
+  "registros_anormais": [
+    {
+      "solicitacao": 31,
+      "latencia_ms": 125.7,
+      "pontuacao": -0.002405
+    },
+    {
+      "solicitacao": 101,
+      "latencia_ms": 480.0,
+      "pontuacao": -0.092605
+    },
+    {
+      "solicitacao": 102,
+      "latencia_ms": 650.0,
+      "pontuacao": -0.089344
+    },
+    {
+      "solicitacao": 103,
+      "latencia_ms": 900.0,
+      "pontuacao": -0.151546
+    }
+  ]
+}
