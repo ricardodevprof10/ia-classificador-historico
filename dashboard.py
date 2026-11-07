@@ -47,8 +47,29 @@ st.set_page_config(
     page_title="Central de Monitoramento | BRITO",
     page_icon="🔴",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
+
+
+# ==========================================
+# NAVEGAÇÃO ENTRE PÁGINAS
+# ==========================================
+
+with st.sidebar:
+    st.markdown("### BRITO SOLUÇÕES TECNOLOGICAS")
+    st.markdown("---")
+    st.page_link(
+        "dashboard.py",
+        label="Central de monitoramento",
+        icon="📊"
+    )
+    st.page_link(
+        "pages/1_Anomalias.py",
+        label="Detecção de anomalias",
+        icon="🔎"
+    )
+    st.markdown("---")
+    st.caption("Monitoramento de IA | MLOps")
 
 
 # ==========================================
