@@ -1,0 +1,76 @@
+
+name: Treinamento automatizado de IA
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/treinar_pipeline.py"
+      - ".github/workflows/treinamento_automatico.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  treinamento:
+    name: Treinar e avaliar classificadores
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 15
+
+    steps:
+      - name: Baixar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-mlops.txt
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-mlops.txt
+
+      - name: Executar treinamento
+        env:
+          STRICT_QUALITY_GATE: "false"
+        run: |
+          python scripts/treinar_pipeline.py
+
+      - name: Verificar arquivos gerados
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          pasta = Path("artefatos_treinamento")
+
+          obrigatorios = [
+              "relatorio_treinamento.json",
+              "comparacao_modelos.csv",
+              "melhor_modelo.joblib",
+              "resumo_treinamento.md",
+          ]
+
+          for nome in obrigatorios:
+              caminho = pasta / nome
+              assert caminho.is_file(), (
+                  f"Arquivo ausente: {caminho}"
+              )
+              assert caminho.stat().st_size > 0
+              print("OK:", caminho)
+          PY
+
+      - name: Publicar artefatos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: treinamento-classificador-historico
+          path: artefatos_treinamento/
+          if-no-files-found: warn
+          retention-days: 30
