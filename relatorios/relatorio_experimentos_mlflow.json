@@ -1,0 +1,42 @@
+{
+    "empresa": "BRITO SOLUÇÕES TECNOLOGICAS",
+    "projeto": "Classificador histórico",
+    "tipo": "comparacao_experimentos",
+    "ambiente": "laboratorio_sintetico",
+    "data_utc": "2026-11-08T04:43:58.890286+00:00",
+    "versao_mlflow": "3.18.0",
+    "versao_sklearn": "1.6.1",
+    "hash_dataset_sha256": "e4a03cf4fcd22ef24b1d3624fcda04cf795dac7a38b62aae68283a050db0098a",
+    "total_documentos": 40,
+    "total_treinamento": 28,
+    "total_teste": 12,
+    "criterio_comparacao": "f1_macro",
+    "modelo_maior_f1_macro": "Regressao_Logistica",
+    "experimentos": [
+        {
+            "modelo": "Regressao_Logistica",
+            "acuracia": 0.5,
+            "f1_macro": 0.4667,
+            "run_id": "7d90f4751fa54791ab87a81ade2caa5a"
+        },
+        {
+            "modelo": "Naive_Bayes",
+            "acuracia": 0.3333,
+            "f1_macro": 0.3083,
+            "run_id": "4382c99f4f5b4eb08648d65fa6f9764a"
+        },
+        {
+            "modelo": "SVM_Linear",
+            "acuracia": 0.5,
+            "f1_macro": 0.4667,
+            "run_id": "9a529e4784664e42aa435b91eccad42b"
+        }
+    ],
+    "observacoes": [
+        "Dados sintéticos.",
+        "Comparação exploratória.",
+        "Amostra de teste pequena.",
+        "Não representa avaliação de produção.",
+        "A seleção requer validação independente."
+    ]
+}
