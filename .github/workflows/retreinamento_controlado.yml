@@ -1,0 +1,100 @@
+
+name: Retreinamento controlado de IA
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: retreinamento-controlado
+  cancel-in-progress: false
+
+jobs:
+  monitorar:
+    name: Avaliar necessidade de retreinamento
+    runs-on: ubuntu-latest
+
+    outputs:
+      retreinar: ${{ steps.decisao.outputs.retreinar }}
+
+    steps:
+      - name: Baixar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Analisar indicadores
+        id: decisao
+        run: |
+          python scripts/analisar_retreinamento.py
+
+      - name: Publicar decisao
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: decisao-retreinamento
+          path: artefatos_retreinamento/
+          if-no-files-found: warn
+          retention-days: 30
+
+  retreinar:
+    name: Retreinar e avaliar modelo
+
+    needs: monitorar
+
+    if: needs.monitorar.outputs.retreinar == 'true'
+
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 15
+
+    steps:
+      - name: Baixar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-mlops.txt
+
+      - name: Executar treinamento experimental
+        run: |
+          python scripts/treinar_pipeline.py
+
+      - name: Executar controle de qualidade
+        id: qualidade
+        continue-on-error: true
+        run: |
+          python scripts/validar_qualidade.py
+
+      - name: Registrar nova versao
+        run: |
+          python scripts/registrar_modelo.py
+
+      - name: Publicar resultados
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: resultado-retreinamento
+          path: |
+            artefatos_treinamento/
+            registro_modelos/
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Registrar bloqueio de qualidade
+        if: steps.qualidade.outcome == 'failure'
+        run: |
+          echo "Modelo reprovado."
+          echo "Nenhuma implantacao sera realizada."
+          echo "O registro foi preservado."
