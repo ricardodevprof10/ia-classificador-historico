@@ -1,0 +1,60 @@
+
+name: Registro e versionamento de modelos
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  registro:
+    name: Registrar e classificar modelo
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 15
+
+    steps:
+      - name: Baixar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-mlops.txt
+
+      - name: Treinar modelo
+        run: |
+          python scripts/treinar_pipeline.py
+
+      - name: Executar controle de qualidade
+        id: qualidade
+        continue-on-error: true
+        run: |
+          python scripts/validar_qualidade.py
+
+      - name: Registrar modelo e decisao
+        run: |
+          python scripts/registrar_modelo.py
+
+      - name: Publicar registro e relatorios
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: registro-modelos
+          path: |
+            registro_modelos/
+            artefatos_treinamento/
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Informar resultado de qualidade
+        if: steps.qualidade.outcome == 'failure'
+        run: |
+          echo "Modelo registrado como rejeitado."
+          echo "A homologacao foi bloqueada."
