@@ -1,0 +1,76 @@
+
+name: Controle de qualidade de IA
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/treinar_pipeline.py"
+      - "scripts/validar_qualidade.py"
+      - "tests/test_validar_qualidade.py"
+      - "config/referencia_modelo.json"
+      - "requirements-mlops.txt"
+      - ".github/workflows/controle_qualidade_ia.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  qualidade:
+    name: Treinamento e validacao
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 15
+
+    steps:
+      - name: Baixar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-mlops.txt
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-mlops.txt
+          pip install pytest
+
+      - name: Executar testes do validador
+        run: |
+          python -m pytest \
+            tests/test_validar_qualidade.py \
+            -v
+
+      - name: Treinar classificadores
+        env:
+          STRICT_QUALITY_GATE: "false"
+        run: |
+          python scripts/treinar_pipeline.py
+
+      - name: Validar qualidade do modelo
+        id: quality_gate
+        continue-on-error: true
+        run: |
+          python scripts/validar_qualidade.py
+
+      - name: Publicar relatorios
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: controle-qualidade-ia
+          path: artefatos_treinamento/
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Bloquear modelo reprovado
+        if: steps.quality_gate.outcome == 'failure'
+        run: |
+          echo "Modelo reprovado no controle de qualidade."
+          exit 1
