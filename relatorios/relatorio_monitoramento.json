@@ -1,7 +1,7 @@
 {
   "modelo": "classificador_historico",
   "versao": "1.0.0",
-  "data_utc": "2026-11-07T16:31:47.319081+00:00",
+  "data_utc": "2026-11-09T21:56:12.616331+00:00",
   "quantidade_referencia": 16,
   "quantidade_atual": 16,
   "metrica": "PSI das categorias previstas",
