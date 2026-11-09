@@ -4,7 +4,7 @@
     "tipo": "auditoria_exploratoria",
     "ambiente": "laboratorio_sintetico",
     "versao_auditoria": "1.0.0",
-    "data_utc": "2026-11-07T18:19:30.964746+00:00",
+    "data_utc": "2026-11-09T19:27:54.280946+00:00",
     "total_treinamento": 67,
     "total_teste": 12,
     "categorias": [
