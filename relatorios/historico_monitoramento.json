@@ -12,5 +12,12 @@
     "versao": "1.0.0",
     "psi": 0.603534,
     "alerta": true
+  },
+  {
+    "data_utc": "2026-11-16T21:38:46.729252+00:00",
+    "modelo": "classificador_historico",
+    "versao": "1.0.0",
+    "psi": 0.603534,
+    "alerta": true
   }
 ]
