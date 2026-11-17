@@ -2,7 +2,7 @@
   "modelo": "classificador_historico",
   "detector": "IsolationForest",
   "versao_detector": "1.0.0",
-  "data_utc": "2026-11-16T19:44:54.810344+00:00",
+  "data_utc": "2026-11-17T18:42:04.686027+00:00",
   "ambiente": "laboratorio_sintetico",
   "total_solicitacoes": 103,
   "anomalias_detectadas": 4,
